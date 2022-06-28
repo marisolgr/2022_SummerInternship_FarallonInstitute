@@ -27,6 +27,7 @@ def Compile_Data_Set_And_Graph(ddir, fn_list, variable_to_plot, save_folder="Sav
     # variable_to_plot: the variable to plot. must be a string that is a variable in the compiled dataset
     # save_folder: a string for a folder that the graphs should be saved in.
     # show_plot: should the graphs be displayed?
+    # Returns the compiled list of data
 
 
 
@@ -200,4 +201,6 @@ def Compile_Data_Set_And_Graph(ddir, fn_list, variable_to_plot, save_folder="Sav
         plt.show()
     else:
         plt.clf
-
+        
+        
+    return(sail)
