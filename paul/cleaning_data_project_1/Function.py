@@ -1,3 +1,7 @@
+# Compile data and plot some stuff
+# By: Paul 7/05/22
+
+
 # import necessary packages
 import numpy as np
 import pandas as pd

@@ -23,12 +23,24 @@ from calendar import month_abbr
     
     
     
-def Compile_Datasets(ddir, fn_list):
+def Compile_Datasets(fn_list_in):
 
-    # ddir: 'root' directory for data
-    # fn_list: list of strings with the file names
+
+    # fn_list_in: list of strings with the file names, or filename(string), or "all"
     # returns: compiled list
     
+    
+    ddir = "/shared/users/mgarciareyes/saildrone_data"
+    
+    # Make sure the fn_list_in is formatted correctly
+    if(fn_list_in == "all"):
+        fn_list = glob.glob(ddir+ '*.nc')
+    elif(type(fn_list_in) == 'list' and type(fn_list_in[0]) == 'string'):
+        fn_list = fn_list_in
+    elif(type(fn_list_in) == 'string'):
+        fn_list[0] = fn_list_in
+    else: 
+        raise Exception("first argument to 'Compile_Data_Set_And_Graph' function must be; a list of file names, a file name, or \"all\"")
     
     # open the first dataset
     sail = xr.open_dataset(ddir + fn_list[0])
