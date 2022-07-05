@@ -8,6 +8,7 @@ import seaborn as sns
 import datetime
 from datetime import date
 import warnings
+import glob
 
 warnings.simplefilter('ignore')
 
@@ -21,16 +22,26 @@ import cartopy.crs as ccrs
 from calendar import month_abbr
 
 
-def Compile_Data_Set_And_Graph(ddir, fn_list, variable_to_plot, save_folder="Saved Graphs", show_plot=False, ):
-    # ddir: root directory (string)
-    # fn_list: a list of strings for the directory of the datasets
+def Compile_Data_Set_And_Graph(fn_list_in, variable_to_plot, save_folder="Saved Graphs", show_plot=False, ):
+
+    # fn_list: a list of strings for the directory of the datasets. Give "All" to read all
     # variable_to_plot: the variable to plot. must be a string that is a variable in the compiled dataset
     # save_folder: a string for a folder that the graphs should be saved in.
     # show_plot: should the graphs be displayed?
     # Returns the compiled list of data
 
-
-
+    # set the 'root' directory for all saildrone data
+    ddir = "/shared/users/mgarciareyes/saildrone_data"
+    
+    if(fn_list_in == "all"):
+        fn_list = glob.glob(ddir+ '*.nc')
+    elif(type(fn_list_in) == 'list' and type(fn_list_in[0]) == 'string'):
+        fn_list = fn_list_in
+    elif(type(fn_list_in) == 'string'):
+        fn_list[0] = fn_list_in
+    else: 
+        raise Exception("first argument to 'Compile_Data_Set_And_Graph' function must be; a list of file names, a file name, or \"all\"")
+    
     # open the first dataset
     sail = xr.open_dataset(ddir + fn_list[0])
     # give the first dataset a relative ID so all datasets can be differentiated
@@ -122,6 +133,8 @@ def Compile_Data_Set_And_Graph(ddir, fn_list, variable_to_plot, save_folder="Sav
     else:  # if the variable the user wants to plot is not in the dataset, give an error
         raise Exception("variable must be in the list: " + str(sail.data_vars))
 
+    # PLOT 2    
+    
     # initialize variables and objects
     fig = plt.figure(figsize=(20, 10), dpi=300)
     ax = plt.axes()
@@ -167,6 +180,9 @@ def Compile_Data_Set_And_Graph(ddir, fn_list, variable_to_plot, save_folder="Sav
     else:
         plt.clf
 
+        
+    # PLOT 3 
+    
     # initialize variables and objects
     fig = plt.figure(figsize=(20, 10), dpi=300)
     ax = plt.axes()
@@ -195,8 +211,49 @@ def Compile_Data_Set_And_Graph(ddir, fn_list, variable_to_plot, save_folder="Sav
     # save the plot as a png
     plt.savefig(save_folder + '/When are cruise - part 2 electric bugaloo.png')
     # show and clear the plt object
-    plt.show()
+    
 
+    if (show_plot):
+        plt.show()
+    else:
+        plt.clf
+        
+        
+        
+    # PLOT 4
+    
+    # initialize variables and objects
+    fig = plt.figure(figsize=(20,10), dpi = 300) 
+    ax = plt.axes()
+    # plot the data
+    pl_obj = plt.scatter(x =sail['time'] , y =sail["relativeID"], s = 100, c = sail['lat'], cmap='jet')
+    # Add the colorbar
+    clb = fig.colorbar(pl_obj, ticks=np.linspace(min(sail['lat']),max(sail['lat']),10))
+    clb.ax.set_title("Flatitude")
+    # make a variable with the timedelta of graph
+    td = max(sail['time']) - min(sail['time'])
+    # Label and add tick marks to the axes 
+    ax.set(xlim=(min(sail['time'])-(td/9), max(sail['time'])+td/100),
+        ylim=(-1, max(sail["relativeID"])+1), yticks = np.arange(0, max(sail["relativeID"])+1))
+    ax.set_ylabel("Cruise ID within dataset")
+    ax.set_xlabel("Day of year")
+
+    # add real cruise IDs to the left of the graph
+    for i in range(len(realID)):
+
+        duration = float(durationList[i])/86400000000000
+
+        xOffset = np.sqrt(duration)/40
+
+        plt.annotate(("Cruise ID: " + str(realID[i]))
+                     , (-39, i))
+
+
+    # title the graph
+    plt.title('When are cruise', fontdict = {'fontsize' : 16})
+    # save the plot as a png
+    plt.savefig(save_folder + '/When are cruise - part 3.png')
+    # show and clear the plt object
     if (show_plot):
         plt.show()
     else:
