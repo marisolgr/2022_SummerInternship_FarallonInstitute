@@ -44,7 +44,7 @@ def Compile_Datasets(fn_list_in):
     else: 
         raise Exception("first argument to 'Compile_Data_Set_And_Graph' function must be; a list of file names, a file name, or \"all\"")
         
-    print()
+
     
     # open the first dataset
     sail = xr.open_dataset(fn_list[0])
