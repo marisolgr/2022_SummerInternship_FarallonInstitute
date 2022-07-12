@@ -31,7 +31,7 @@ def Compile_Datasets(fn_list_in):
     # returns: compiled list
     fn_list = []
     
-    ddir = "/shared/users/mgarciareyes/saildrone_data"
+    ddir = "../../saildrone_data"
     
     # Make sure the fn_list_in is formatted correctly
     if(fn_list_in == "all"):
@@ -53,6 +53,11 @@ def Compile_Datasets(fn_list_in):
     
     # give the first dataset a relative ID so all datasets can be differentiated
     sail["relativeID"] = 0
+    
+    # normalize longitude
+    # sail["lon"] = Normalize_Longitude(sail["lon"]) # busdvvfs
+    sail["lon"] = (np.mod(sail["lon"] + 180,360) - 180)
+    
     # make lists for certain variables that remain constant for each dataset. these are used later in the last two cells
     yearList = [sail["time"][0].dt.year]
     durationList = [sail["time"][len(sail["time"]) - 1] - sail["time"][0]]
@@ -64,6 +69,9 @@ def Compile_Datasets(fn_list_in):
     sail["realID"] = realID[0]
     # add the duration back to the dataset
     sail["duration"] = durationList[0]
+    # extrapolate some extra variables
+    sail["Delta_TEMP_CTD_MEAN"] = sail["TEMP_CTD_MEAN"].differentiate("time", edge_order=1, datetime_unit="D")
+    sail["Delta_SAL_CTD_MEAN"] = sail["SAL_CTD_MEAN"].differentiate("time", edge_order=1, datetime_unit="D")
 
     # repeat previous steps for other datasets that need to be combined.
 
@@ -83,6 +91,14 @@ def Compile_Datasets(fn_list_in):
             temp["duration"] = tempDuration
             durationList.append(tempDuration)
             temp["realID"] = realID[i]
+            
+            # normalize longitude
+            # temp["lon"] = Normalize_Longitude(temp["lon"]) #nsfbigb
+            temp["lon"] = (np.mod(temp["lon"] + 180,360) - 180)
+            
+            temp["Delta_TEMP_CTD_MEAN"] = temp["TEMP_CTD_MEAN"].differentiate("time", edge_order=1, datetime_unit="D")
+            temp["Delta_SAL_CTD_MEAN"] = temp["SAL_CTD_MEAN"].differentiate("time", edge_order=1, datetime_unit="D")
+            
             sail = xr.concat([sail, temp], dim="time")
             temp.close()
 
@@ -95,4 +111,12 @@ def Compile_Datasets(fn_list_in):
 
 
 
-
+def Normalize_Longitude(lon_list):
+    out_list = []
+    for lon in lon_list:
+        if(lon>180):
+            out_list.append(lon-180)
+        else:
+            out_list.append(lon-180)
+    return(out_list)
+    # return(np.mod(lon_list + 180,360) - 180)

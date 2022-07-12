@@ -18,12 +18,11 @@ import cartopy.crs as ccrs
 from calendar import month_abbr    
     
 
-def trajectory_plot(dataset, var_to_plot, show = True, save_path = None, func_dpi = 300): 
+def trajectory_plot(dataset, var_to_plot, show = True, save_path = None): 
     # dataset: the dataset to get data from (Dataset)
     # var_to_plot: the variable to be represented by color (String)
     # show: should the plot be displayed (Bool)
     # save_path: the path to save the image. '.png' will be added automatically. (string)
-    # func_dpi: the DPI of the returned image (int)
     # does not return anything
 
     # reformat dates
@@ -36,16 +35,9 @@ def trajectory_plot(dataset, var_to_plot, show = True, save_path = None, func_dp
 
      
         #define latitude and longitude boundaries
-        latr = [np.nanmin(dataset['lat'].values), np.nanmax(dataset['lat'].values)] 
-        lonr = [np.nanmax(dataset['lon'].values), np.nanmin(dataset['lon'].values)] 
-        
+        latr = [min(dataset['lat']), max(dataset['lat'])] 
+        lonr = [max(dataset['lon']), min(dataset['lon'])] 
 
-        print("latr")
-        print(latr)
-        print("lonr")
-        print(lonr)
-        
-        
         # Select a region of our data, giving it a margin
         margin = 0.5 
         region = np.array([[latr[0]-margin,latr[1]+margin],[lonr[0]+margin,lonr[1]-margin]]) 
@@ -58,7 +50,7 @@ def trajectory_plot(dataset, var_to_plot, show = True, save_path = None, func_dp
                 facecolor='none')
 
         # Create and set the figure context
-        fig = plt.figure(figsize=(16,10), dpi = func_dpi) 
+        fig = plt.figure(figsize=(16,10), dpi = 300) 
         ax = plt.axes(projection=ccrs.PlateCarree()) 
         ax.coastlines(resolution='10m',linewidth=1,color='black') 
         ax.add_feature(cfeature.LAND, color='grey', alpha=0.3)

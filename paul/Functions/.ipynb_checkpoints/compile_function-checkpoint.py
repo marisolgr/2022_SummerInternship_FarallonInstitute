@@ -31,7 +31,7 @@ def Compile_Datasets(fn_list_in):
     # returns: compiled list
     fn_list = []
     
-    ddir = "../../saildrone_data"
+    ddir = "/shared/users/mgarciareyes/saildrone_data"
     
     # Make sure the fn_list_in is formatted correctly
     if(fn_list_in == "all"):
@@ -55,8 +55,7 @@ def Compile_Datasets(fn_list_in):
     sail["relativeID"] = 0
     
     # normalize longitude
-    # sail["lon"] = Normalize_Longitude(sail["lon"]) # busdvvfs
-    sail["lon"] = (np.mod(sail["lon"] + 180,360) - 180)
+    sail["lon"] = Normalize_Longitude(sail["lon"])
     
     # make lists for certain variables that remain constant for each dataset. these are used later in the last two cells
     yearList = [sail["time"][0].dt.year]
@@ -93,8 +92,7 @@ def Compile_Datasets(fn_list_in):
             temp["realID"] = realID[i]
             
             # normalize longitude
-            # temp["lon"] = Normalize_Longitude(temp["lon"]) #nsfbigb
-            temp["lon"] = (np.mod(temp["lon"] + 180,360) - 180)
+            temp["lon"] = Normalize_Longitude(temp["lon"])
             
             temp["Delta_TEMP_CTD_MEAN"] = temp["TEMP_CTD_MEAN"].differentiate("time", edge_order=1, datetime_unit="D")
             temp["Delta_SAL_CTD_MEAN"] = temp["SAL_CTD_MEAN"].differentiate("time", edge_order=1, datetime_unit="D")
@@ -112,11 +110,4 @@ def Compile_Datasets(fn_list_in):
 
 
 def Normalize_Longitude(lon_list):
-    out_list = []
-    for lon in lon_list:
-        if(lon>180):
-            out_list.append(lon-180)
-        else:
-            out_list.append(lon-180)
-    return(out_list)
-    # return(np.mod(lon_list + 180,360) - 180)
+    return(np.mod(lon_list + 180,360) - 180)
