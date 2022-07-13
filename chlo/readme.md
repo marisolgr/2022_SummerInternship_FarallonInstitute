@@ -1,6 +1,8 @@
 # Chlorophyll Project
 Author: Austin
+
 Date: 13 July 2022
+
 Description: This function will plot a 300km-diameter graph of chlorophyll levels around certain seabird sites globally.
 
 Methods:
