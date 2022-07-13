@@ -42,15 +42,15 @@ def trajectory_plot(dataset, var_to_plot, show=True, save_path=None, func_dpi=30
             facecolor='none')
 
         # Create and set the figure context
-        fig = plt.figure(figsize=(16, 10), dpi=func_dpi)
+        fig = plt.figure(figsize=(16, 9), dpi=func_dpi)
         ax = plt.axes(projection=ccrs.PlateCarree())
         ax.coastlines(resolution='10m', linewidth=1, color='black')
         ax.add_feature(cfeature.LAND, color='grey', alpha=0.3)
         ax.add_feature(states_provinces, linewidth=0.5)
         ax.add_feature(cfeature.BORDERS)
         ax.set_extent([region[1, 0], region[1, 1], region[0, 0], region[0, 1]], crs=ccrs.PlateCarree())
-        ax.set_xticks(np.round([*np.arange(region[1, 1], region[1, 0] + 1, 2)][::-1], 0), crs=ccrs.PlateCarree())
-        ax.set_yticks(np.round([*np.arange(np.floor(region[0, 0]), region[0, 1] + 1, 1.5)], 1), crs=ccrs.PlateCarree())
+        ax.set_xticks(np.round([*np.arange(region[1, 1], region[1, 0] + 1, 25)][::-1], 0), crs=ccrs.PlateCarree())
+        ax.set_yticks(np.round([*np.arange(np.floor(region[0, 0]), region[0, 1] + 1, 15)], 1), crs=ccrs.PlateCarree())
         ax.xaxis.set_major_formatter(LongitudeFormatter(zero_direction_label=True))
         ax.yaxis.set_major_formatter(LatitudeFormatter())
         ax.gridlines(linestyle='--', linewidth=0.5)
@@ -60,7 +60,8 @@ def trajectory_plot(dataset, var_to_plot, show=True, save_path=None, func_dpi=30
         sc = plt.scatter(x=dataset['lon'], y=dataset['lat'], c=dataset[var_to_plot], cmap='jet')
 
         # make the colorbar with 20 evenly spaced labels
-        clb = fig.colorbar(sc, ticks=np.linspace(np.nanmin(dataset[var_to_plot]), np.nanmax(dataset[var_to_plot]), 20))
+        clb = plt.colorbar(sc, ticks=np.linspace(np.nanmin(dataset[var_to_plot]), np.nanmax(dataset[var_to_plot]), 20))
+        # fraction=0.046, pad=0.1)
         clb.ax.set_title(var_to_plot)
 
         # title the graph
@@ -68,10 +69,12 @@ def trajectory_plot(dataset, var_to_plot, show=True, save_path=None, func_dpi=30
 
         # save file
         if save_path is not None:
+            print("save attempt")
             plt.savefig(save_path + '.png')
-            plt.clf()
         if show:  # show and clear the plt object
             plt.show()
+        else:
+            plt.clf()
 
     else:  # if the variable the user wants to plot is not in the dataset, give an error
         raise Exception("variable must be in the list")
