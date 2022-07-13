@@ -18,14 +18,18 @@ def Compile_Datasets(fn_list_in):
     # returns: compiled list
     fn_list = []
 
-    ddir = "../../saildrone_data"
+
+
+    ddir = "../../saildrone_data/"
+
 
     # Make sure the fn_list_in is formatted correctly
     if (fn_list_in == "all"):
 
         fn_list = glob.glob(ddir + '/*.nc')
-    elif (type(fn_list_in) == 'list' and type(fn_list_in[0]) == 'string'):
-        fn_list = fn_list_in
+    elif (type(fn_list_in) is list and type(fn_list_in[0]) is str):
+        for fn_item in fn_list_in:
+            fn_list.append(ddir+fn_item)
     elif (type(fn_list_in) == 'string'):
         fn_list[0] = fn_list_in
     else:
@@ -59,8 +63,8 @@ def Compile_Datasets(fn_list_in):
     # extrapolate some extra variables
     sail["Delta_TEMP_CTD_MEAN"] = sail["TEMP_CTD_MEAN"].differentiate("time", edge_order=1, datetime_unit="D")
     sail["Delta_SAL_CTD_MEAN"] = sail["SAL_CTD_MEAN"].differentiate("time", edge_order=1, datetime_unit="D")
-    sail.drop_dims("obs", errors="ignore")
-    sail.drop_vars("obs", errors="ignore")
+    sail = sail.drop_dims("obs", errors="ignore")
+    sail = sail.drop_vars("obs", errors="ignore")
 
     # repeat previous steps for other datasets that need to be combined.
 
@@ -84,15 +88,10 @@ def Compile_Datasets(fn_list_in):
             # normalize longitude
             # temp["lon"] = Normalize_Longitude(temp["lon"]) #nsfbigb
             temp["lon"] = (np.mod(temp["lon"] + 180, 360) - 180)
-            temp.drop_vars("obs", errors="ignore")
-            temp.drop_dims("obs", errors="ignore")
+            temp = temp.drop_vars("obs", errors="ignore")
+            temp = temp.drop_dims("obs", errors="ignore")
             temp["Delta_TEMP_CTD_MEAN"] = temp["TEMP_CTD_MEAN"].differentiate("time", edge_order=1, datetime_unit="D")
             temp["Delta_SAL_CTD_MEAN"] = temp["SAL_CTD_MEAN"].differentiate("time", edge_order=1, datetime_unit="D")
-            try:
-                if(temp.obs):
-                    print("mogus")
-            except:
-                print("no")
             sail = xr.concat([sail, temp], dim="time",coords="minimal", compat="override", combine_attrs="drop_conflicts")
             temp.close()
 
