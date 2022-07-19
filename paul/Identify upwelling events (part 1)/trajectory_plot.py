@@ -78,4 +78,4 @@ def trajectory_plot(dataset, var_to_plot, show=True, save_path=None, func_dpi=30
 
     else:  # if the variable the user wants to plot is not in the dataset, give an error
         raise Exception("variable must be in the list")
-    return "mogus"
+

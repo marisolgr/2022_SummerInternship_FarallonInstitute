@@ -9,28 +9,25 @@ import warnings
 
 warnings.simplefilter('ignore')
 
-
 import glob
 
 
-def Compile_Datasets(fn_list_in):
+def Compile_Datasets(fn_list_in, lon_min=-180, lon_max=180, lat_min=-90, lat_max=90, remove_bay=True,
+                     remove_anomalies=True):
     # fn_list_in: list of strings with the file names, or filename(string), or "all"
     # returns: compiled list
     fn_list = []
 
-
-
     ddir = "../../saildrone_data/"
 
-
     # Make sure the fn_list_in is formatted correctly
-    if (fn_list_in == "all"):
+    if fn_list_in == "all":
 
         fn_list = glob.glob(ddir + '/*.nc')
-    elif (type(fn_list_in) is list and type(fn_list_in[0]) is str):
+    elif type(fn_list_in) is list and type(fn_list_in[0]) is str:
         for fn_item in fn_list_in:
-            fn_list.append(ddir+fn_item)
-    elif (type(fn_list_in) == 'string'):
+            fn_list.append(ddir + fn_item)
+    elif type(fn_list_in) == 'string':
         fn_list[0] = fn_list_in
     else:
         raise Exception(
@@ -92,22 +89,48 @@ def Compile_Datasets(fn_list_in):
             temp = temp.drop_dims("obs", errors="ignore")
             temp["Delta_TEMP_CTD_MEAN"] = temp["TEMP_CTD_MEAN"].differentiate("time", edge_order=1, datetime_unit="D")
             temp["Delta_SAL_CTD_MEAN"] = temp["SAL_CTD_MEAN"].differentiate("time", edge_order=1, datetime_unit="D")
-            sail = xr.concat([sail, temp], dim="time",coords="minimal", compat="override", combine_attrs="drop_conflicts")
+            sail = xr.concat([sail, temp], dim="time", coords="minimal", compat="override",
+                             combine_attrs="drop_conflicts")
             temp.close()
 
     # reformat dates
     sail['date'] = mdates.date2num(sail['time'].dt.date)
 
-    # ask what variable should be plotted
-    return (sail)
+    # constrain region
+
+    sail = sail.where((sail.lat <= lat_max) &
+                      (sail.lat >= lat_min) &
+                      (sail.lon <= lon_max) &
+                      (sail.lon >= lon_min))
+
+    # Removes SF bay data
+    if remove_bay:
+        sail = sail.where(~(((sail.lon > -122.5938) &
+                             (sail.lat > 37.72783)) &
+                            ((sail.lon < -122.2506620424831) &
+                             (sail.lat < 38.094658646550556))) |
+                          ~(((sail.lon > -122.38678630116495) &
+                             (sail.lat > 37.430464705762226)) &
+                            ((sail.lon < -121.99799777841487) &
+                             (sail.lat < 37.81408437558721))))
+
+    sail["Delta_TEMP_CTD_MEAN_STDEV"] = sail.std("time", True)["Delta_TEMP_CTD_MEAN"]
+    sail["Delta_SAL_CTD_MEAN_STDEV"] = sail.std("time", True)["Delta_SAL_CTD_MEAN"]
+    sail["VWND_MEAN_STDEV"] = sail.std("time", True)["VWND_MEAN"]
+
+    if remove_anomalies:
+        sail = sail.where((sail.Delta_TEMP_CTD_MEAN_STDEV < 6) &
+                          (sail.Delta_SAL_CTD_MEAN_STDEV < 6) &
+                          (sail.VWND_MEAN_STDEV < 6))
+    return sail
 
 
 def Normalize_Longitude(lon_list):
     out_list = []
     for lon in lon_list:
-        if (lon > 180):
+        if lon > 180:
             out_list.append(lon - 180)
         else:
             out_list.append(lon - 180)
-    return (out_list)
+    return out_list
     # return(np.mod(lon_list + 180,360) - 180)
