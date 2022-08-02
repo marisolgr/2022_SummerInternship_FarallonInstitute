@@ -29,11 +29,13 @@ def trajectory_plot(dataset, var_to_plot, show=True, save_path=None, func_dpi=30
         # define latitude and longitude boundaries
         latr = [np.nanmin(dataset['lat'].values), np.nanmax(dataset['lat'].values)]
         lonr = [np.nanmax(dataset['lon'].values), np.nanmin(dataset['lon'].values)]
-
+        print(f"dataset['lat'].values: {dataset['lat'].values}")
+        print(f"latr: {latr}")
+        print(f"lonr: {lonr}")
         # Select a region of our data, giving it a margin
         margin = 0.5
         region = np.array([[latr[0] - margin, latr[1] + margin], [lonr[0] + margin, lonr[1] - margin]])
-
+        print(region)
         # add state outlines
         states_provinces = cfeature.NaturalEarthFeature(
             category='cultural',

@@ -114,9 +114,9 @@ def Compile_Datasets(fn_list_in, lon_min=-180, lon_max=180, lat_min=-90, lat_max
                             ((sail.lon < -121.99799777841487) &
                              (sail.lat < 37.81408437558721))))
 
-    sail["Delta_TEMP_CTD_MEAN_STDEV"] = sail.std("time", True)["Delta_TEMP_CTD_MEAN"]
-    sail["Delta_SAL_CTD_MEAN_STDEV"] = sail.std("time", True)["Delta_SAL_CTD_MEAN"]
-    sail["VWND_MEAN_STDEV"] = sail.std("time", True)["VWND_MEAN"]
+    sail["Delta_TEMP_CTD_MEAN_STDEV"] = np.nanstd(sail["Delta_TEMP_CTD_MEAN"])
+    sail["Delta_SAL_CTD_MEAN_STDEV"] = np.nanstd(sail["Delta_SAL_CTD_MEAN"])
+    sail["VWND_MEAN_STDEV"] = np.nanstd(sail["VWND_MEAN"])
 
     if remove_anomalies:
         sail = sail.where((sail.Delta_TEMP_CTD_MEAN_STDEV < 6) &
