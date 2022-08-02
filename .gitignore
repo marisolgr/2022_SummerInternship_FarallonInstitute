@@ -1,2 +1,5 @@
 .pyc
-
+.ipynb_checkpoints
+*_checkpoints.ipynb
+WindowsPowerShell/profile.ps1
+.DS_Store
